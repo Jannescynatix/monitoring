@@ -1,4 +1,4 @@
-// models/Website.js
+// public/Website.js
 const mongoose = require('mongoose');
 
 const WebsiteSchema = new mongoose.Schema({

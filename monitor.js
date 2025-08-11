@@ -1,6 +1,6 @@
 // monitor.js
 const axios = require('axios');
-const Website = require('./public/Website');
+const Website = require('./models/Website');
 
 const checkWebsite = async (website) => {
     try {

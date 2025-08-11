@@ -1,4 +1,4 @@
-// public/js/app.js
+// models/js/app.js
 document.addEventListener('DOMContentLoaded', () => {
     const loginView = document.getElementById('loginView');
     const registerView = document.getElementById('registerView');
