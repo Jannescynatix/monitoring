@@ -4,8 +4,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const path = require('path');
-const cron = require('node-cron');
-const { checkAllWebsites } = require('./monitor');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,7 +12,7 @@ mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.error('DB connection error:', err));
 
-app.use(express.json()); // Wichtig für die JSON-Kommunikation mit dem Frontend
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
@@ -25,20 +23,18 @@ app.use(session({
 }));
 
 const authRoutes = require('./routes/auth');
-const dashboardRoutes = require('./routes/dashboard');
+// WICHTIG: Importiere die neuen Notizen-Routen
+const notesRoutes = require('./routes/notes');
 
 app.use('/api', authRoutes);
-app.use('/api', dashboardRoutes);
+app.use('/api', notesRoutes); // Verwende die neuen Routen
 
-// Die Hauptseite, die unsere Single-Page-Application lädt
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-cron.schedule('*/5 * * * *', () => {
-    console.log('Führe periodische Überprüfung aller Websites aus...');
-    checkAllWebsites();
-});
+// Keine Cron-Job mehr für Notizen
+// cron.schedule(...)
 
 app.listen(PORT, () => {
     console.log(`Server läuft auf Port ${PORT}`);

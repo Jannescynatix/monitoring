@@ -1,15 +1,16 @@
-// models/js/app.js
+// public/js/app.js
 document.addEventListener('DOMContentLoaded', () => {
+    // DOM-Elemente
     const loginView = document.getElementById('loginView');
     const registerView = document.getElementById('registerView');
     const dashboardView = document.getElementById('dashboardView');
     const authLinks = document.getElementById('authLinks');
     const userGreeting = document.getElementById('userGreeting');
     const welcomeText = document.getElementById('welcomeText');
-    const websiteList = document.getElementById('websiteList');
+    const notesList = document.getElementById('notesList');
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
-    const addWebsiteForm = document.getElementById('addWebsiteForm');
+    const addNoteForm = document.getElementById('addNoteForm');
 
     // Routing-Funktion
     const navigate = (view) => {
@@ -25,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             userGreeting.style.display = 'flex';
             welcomeText.textContent = `Willkommen, ${user.username}!`;
             navigate('dashboard');
-            fetchWebsites();
+            fetchNotes();
         } else {
             authLinks.style.display = 'flex';
             userGreeting.style.display = 'none';
@@ -33,49 +34,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // API-Kommunikation
-    const fetchWebsites = async () => {
-        const response = await fetch('/api/websites');
+    // API-Kommunikation für Notizen
+    const fetchNotes = async () => {
+        const response = await fetch('/api/notes');
         if (response.ok) {
-            const websites = await response.json();
-            renderWebsites(websites);
+            const notes = await response.json();
+            renderNotes(notes);
         } else {
-            console.error('Fehler beim Laden der Websites');
-            updateUI(false);
+            if (response.status === 401) {
+                updateUI(false);
+            }
+            console.error('Fehler beim Laden der Notizen');
         }
     };
 
-    const renderWebsites = (websites) => {
-        websiteList.innerHTML = '';
-        if (websites.length === 0) {
-            websiteList.innerHTML = '<p>Noch keine Websites hinzugefügt.</p>';
+    const renderNotes = (notes) => {
+        notesList.innerHTML = '';
+        if (notes.length === 0) {
+            notesList.innerHTML = '<p>Noch keine Notizen vorhanden.</p>';
             return;
         }
 
-        websites.forEach(website => {
-            const card = document.createElement('div');
-            card.className = `website-card status-${website.status}`;
-            card.innerHTML = `
-                <h3>${website.name}</h3>
-                <p>${website.url}</p>
+        notes.forEach(note => {
+            const noteCard = document.createElement('div');
+            noteCard.className = 'note-card';
+            noteCard.innerHTML = `
+                <h3>${note.title}</h3>
+                <p>${note.content}</p>
                 <div class="card-footer">
-                    <span>Status: <strong>${website.status.toUpperCase()}</strong></span>
-                    <button class="delete-btn" data-id="${website._id}">Löschen</button>
+                    <small>Erstellt am: ${new Date(note.createdAt).toLocaleDateString()}</small>
+                    <button class="delete-btn" data-id="${note._id}">Löschen</button>
                 </div>
             `;
-            websiteList.appendChild(card);
+            notesList.appendChild(noteCard);
         });
 
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const id = e.target.dataset.id;
-                await fetch(`/api/websites/${id}`, { method: 'DELETE' });
-                fetchWebsites(); // Dashboard neu laden
+                await fetch(`/api/notes/${id}`, { method: 'DELETE' });
+                fetchNotes();
             });
         });
     };
 
-    // Event-Listener für Authentifizierung
+    // Event-Listener für Notizen
+    addNoteForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('noteTitle').value;
+        const content = document.getElementById('noteContent').value;
+
+        await fetch('/api/notes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, content })
+        });
+        e.target.reset();
+        fetchNotes();
+    });
+
+    // ... Event-Listener für Login, Register, Logout, etc. (bleiben gleich)
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = e.target.loginUsername.value;
@@ -110,31 +128,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    addWebsiteForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = e.target.addName.value;
-        const url = e.target.addUrl.value;
-        await fetch('/api/websites', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, url })
-        });
-        e.target.reset(); // Formular zurücksetzen
-        fetchWebsites();
-    });
-
     document.getElementById('logoutBtn').addEventListener('click', async () => {
         await fetch('/api/logout');
         updateUI(false);
     });
 
-    // Navigations-Events
     document.getElementById('loginBtn').addEventListener('click', () => navigate('login'));
     document.getElementById('registerBtn').addEventListener('click', () => navigate('register'));
     document.getElementById('toLogin').addEventListener('click', (e) => { e.preventDefault(); navigate('login'); });
     document.getElementById('toRegister').addEventListener('click', (e) => { e.preventDefault(); navigate('register'); });
 
-    // Initialen Sitzungsstatus überprüfen
     const checkSession = async () => {
         const response = await fetch('/api/session');
         const data = await response.json();
@@ -142,7 +145,4 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     checkSession();
-
-    // Periodische Aktualisierung des Dashboards
-    setInterval(fetchWebsites, 60000); // Alle 60 Sekunden aktualisieren
 });
