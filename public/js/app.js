@@ -1,5 +1,6 @@
-// models/js/app.js
+// public/js/app.js
 document.addEventListener('DOMContentLoaded', () => {
+    // DOM-Elemente
     const loginView = document.getElementById('loginView');
     const registerView = document.getElementById('registerView');
     const dashboardView = document.getElementById('dashboardView');
@@ -40,8 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const websites = await response.json();
             renderWebsites(websites);
         } else {
+            // Wenn der Token abgelaufen ist, den Benutzer ausloggen
+            if (response.status === 401) {
+                updateUI(false);
+            }
             console.error('Fehler beim Laden der Websites');
-            updateUI(false);
         }
     };
 
@@ -54,12 +58,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         websites.forEach(website => {
             const card = document.createElement('div');
+            // Logik zur visuellen Unterscheidung der Status "up" und "down"
+            let statusText = website.status.toUpperCase();
+            if (website.status === 'down') {
+                statusText = '❌ DOWN';
+            } else if (website.status === 'up') {
+                statusText = '✅ UP';
+            } else {
+                statusText = '⏳ UNKNOWN'; // Für bessere visuelle Klarheit
+            }
+
             card.className = `website-card status-${website.status}`;
             card.innerHTML = `
                 <h3>${website.name}</h3>
                 <p>${website.url}</p>
                 <div class="card-footer">
-                    <span>Status: <strong>${website.status.toUpperCase()}</strong></span>
+                    <span>Status: <strong>${statusText}</strong></span>
                     <button class="delete-btn" data-id="${website._id}">Löschen</button>
                 </div>
             `;
@@ -70,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', async (e) => {
                 const id = e.target.dataset.id;
                 await fetch(`/api/websites/${id}`, { method: 'DELETE' });
-                fetchWebsites(); // Dashboard neu laden
+                fetchWebsites();
             });
         });
     };
@@ -110,10 +124,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Wichtige Verbesserung: Validierung des URL-Formats
     addWebsiteForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = e.target.addName.value;
-        const url = e.target.addUrl.value;
+        let url = e.target.addUrl.value.trim(); // Leerzeichen entfernen
+
+        // Automatisch "https://" hinzufügen, wenn es fehlt
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+
         await fetch('/api/websites', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -144,5 +165,5 @@ document.addEventListener('DOMContentLoaded', () => {
     checkSession();
 
     // Periodische Aktualisierung des Dashboards
-    setInterval(fetchWebsites, 60000); // Alle 60 Sekunden aktualisieren
+    setInterval(fetchWebsites, 60000); // Aktualisiert das Dashboard alle 60 Sekunden
 });
