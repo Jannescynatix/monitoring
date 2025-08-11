@@ -1,0 +1,94 @@
+/* public/style.css */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+.header {
+    background-color: #ffffff;
+    padding: 1.5em 3em;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header h1 {
+    margin: 0;
+    font-size: 1.5em;
+}
+.container {
+    max-width: 900px;
+    margin: 2em auto;
+    padding: 0 2em;
+}
+.website-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2em;
+}
+.website-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 1.5em;
+    transition: transform 0.2s;
+}
+.website-card:hover {
+    transform: translateY(-5px);
+}
+.status-up { border-left: 5px solid #28a745; }
+.status-down { border-left: 5px solid #dc3545; }
+.status-unknown { border-left: 5px solid #ffc107; }
+.website-card h3 {
+    margin-top: 0;
+    font-size: 1.2em;
+}
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1em;
+}
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5em 1em;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.add-section {
+    background-color: #ffffff;
+    padding: 2em;
+    border-radius: 8px;
+    margin-top: 2em;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.add-section input {
+    width: 100%;
+    padding: 0.8em;
+    margin-bottom: 1em;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+.button {
+    background-color: #007bff;
+    color: white;
+    padding: 0.8em 1.5em;
+    text-decoration: none;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+.error {
+    color: #dc3545;
+    background-color: #f8d7da;
+    padding: 1em;
+    border-radius: 5px;
+}
+.login-form, .register-form {
+    text-align: center;
+}
