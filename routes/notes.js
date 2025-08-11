@@ -1,6 +1,6 @@
-// routes/dashboard.js
+// routes/note.js
 const express = require('express');
-const Website = require('../models/Website');
+const Website = require('../models/Note');
 
 const router = express.Router();
 
